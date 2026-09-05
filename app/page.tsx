@@ -5,6 +5,7 @@ import HomeSection from "@/components/sections/HomeSection";
 import ProjectsSection from "@/components/sections/ProjectsSection";
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
+import WhatsAppButton from "@/components/layout/WhatsAppButton";
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
         <ProjectsSection />
         <EducationSection />
         <ContactSection />
+        <WhatsAppButton/>
       </main>
       <Footer />
     </>
