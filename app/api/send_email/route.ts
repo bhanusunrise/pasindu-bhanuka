@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import transporter from "@/lib/nodemailer";
+import { contactRateLimiter } from "@/lib/rateLimit";
 import {
   contactNotificationEmail,
   contactThankYouEmail,
@@ -13,17 +14,30 @@ import type {
 
 export const runtime = "nodejs";
 
-function escapeHtml(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    const forwardedFor = request.headers.get("x-forwarded-for");
+
+    const ip =
+      forwardedFor?.split(",")[0]?.trim() ??
+      request.headers.get("x-real-ip") ??
+      "unknown";
+
+    const rateLimit = await contactRateLimiter.limit(ip);
+
+    if (!rateLimit.success) {
+      return NextResponse.json<EmailResponse>(
+        {
+          success: false,
+          message:
+            "Too many messages sent. Please wait a few minutes and try again.",
+        },
+        {
+          status: 429,
+        },
+      );
+    }
+
     const body: EmailItem = await request.json();
 
     const name = body.name?.trim();
@@ -31,7 +45,6 @@ export async function POST(request: Request) {
     const subject = body.subject?.trim();
     const message = body.message?.trim();
 
-    // Validate required fields
     if (!name || !email || !subject || !message) {
       return NextResponse.json<EmailResponse>(
         {
@@ -44,7 +57,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Basic email validation
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailPattern.test(email)) {
@@ -60,8 +72,6 @@ export async function POST(request: Request) {
     }
 
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      console.error("SMTP environment variables are missing.");
-
       return NextResponse.json<EmailResponse>(
         {
           success: false,
@@ -73,18 +83,12 @@ export async function POST(request: Request) {
       );
     }
 
-    // Escape values before using them inside HTML email templates
-    const safeData: EmailItem = {
-      name: escapeHtml(name),
-      email: escapeHtml(email),
-      subject: escapeHtml(subject),
-      message: escapeHtml(message),
-    };
+    const notificationTemplate =
+      contactNotificationEmail(body);
 
-    const notificationTemplate = contactNotificationEmail(safeData);
-    const thankYouTemplate = contactThankYouEmail(safeData);
+    const thankYouTemplate =
+      contactThankYouEmail(body);
 
-    // Send notification email to yourself
     await transporter.sendMail({
       from: `"Portfolio Contact" <${process.env.SMTP_USER}>`,
       to: process.env.SMTP_USER,
@@ -94,7 +98,6 @@ export async function POST(request: Request) {
       html: notificationTemplate.html,
     });
 
-    // Send confirmation email to the visitor
     await transporter.sendMail({
       from: `"Pasindu Bhanuka" <${process.env.SMTP_USER}>`,
       to: email,
@@ -103,15 +106,10 @@ export async function POST(request: Request) {
       html: thankYouTemplate.html,
     });
 
-    return NextResponse.json<EmailResponse>(
-      {
-        success: true,
-        message: "Your message has been sent successfully.",
-      },
-      {
-        status: 200,
-      },
-    );
+    return NextResponse.json<EmailResponse>({
+      success: true,
+      message: "Your message has been sent successfully.",
+    });
   } catch (error) {
     console.error("Send email error:", error);
 
