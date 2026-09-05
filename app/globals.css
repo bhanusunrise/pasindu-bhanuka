@@ -1,0 +1,202 @@
+@import "tailwindcss";
+
+@theme {
+  --color-nav: #0d1321;
+  --color-section-odd: #1d2d44;
+  --color-section-even: #3e5c76;
+  --color-muted: #748cab;
+  --color-cream: #f0ebd8;
+
+  /* Font utilities */
+  --font-sans: var(--font-roboto);
+  --font-passage: var(--font-roboto);
+  --font-heading: var(--font-orbitron);
+}
+
+:root {
+  --navbar-height: 72px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: #0d1321;
+}
+
+body {
+  margin: 0;
+  background: #0d1321;
+  color: #f0ebd8;
+
+  /* Roboto is the default font */
+  font-family: var(--font-roboto), Arial, Helvetica, sans-serif;
+
+  overflow-x: hidden;
+}
+
+/* Normal text uses Roboto */
+p,
+span,
+li,
+a,
+button,
+input,
+textarea,
+label,
+small,
+strong,
+img[alt] {
+  font-family: inherit;
+}
+
+/* Headings use Orbitron */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-orbitron), Arial, Helvetica, sans-serif;
+}
+
+/* Explicit utility classes */
+.font-heading {
+  font-family: var(--font-orbitron), Arial, Helvetica, sans-serif;
+}
+
+.font-passage {
+  font-family: var(--font-roboto), Arial, Helvetica, sans-serif;
+}
+
+/* Text selection */
+::selection {
+  background: #748cab;
+  color: #0d1321;
+}
+
+/* Interactive transitions */
+a,
+button,
+input,
+textarea {
+  transition:
+    color 300ms ease-in-out,
+    background-color 300ms ease-in-out,
+    border-color 300ms ease-in-out,
+    opacity 300ms ease-in-out,
+    transform 300ms ease-in-out;
+}
+
+/* Link hover */
+a:hover {
+  color: #748cab;
+}
+
+/* Form elements */
+input,
+textarea,
+button {
+  font-family: inherit;
+}
+
+input,
+textarea {
+  color: #f0ebd8;
+  caret-color: #f0ebd8;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #748cab;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+}
+
+/* Fixed navbar offset */
+.section-anchor {
+  scroll-margin-top: var(--navbar-height);
+}
+
+/* Reveal animation */
+.reveal {
+  opacity: 0;
+
+  transition:
+    opacity 700ms ease-in-out,
+    transform 700ms ease-in-out;
+
+  will-change: transform, opacity;
+}
+
+/* Left-side reveal */
+.reveal-left {
+  transform: translateX(-56px);
+}
+
+/* Right-side reveal */
+.reveal-right {
+  transform: translateX(56px);
+}
+
+/* Upward reveal */
+.reveal-up {
+  transform: translateY(36px);
+}
+
+/* Visible reveal state */
+.reveal-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d1321;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #748cab;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #f0ebd8;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #748cab #0d1321;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
