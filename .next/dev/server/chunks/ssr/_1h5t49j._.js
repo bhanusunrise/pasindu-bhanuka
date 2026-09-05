@@ -2292,7 +2292,7 @@ function useSendEmail() {
         setError(null);
         setSuccess(null);
         try {
-            const response = await fetch("/api/emails/send_email", {
+            const response = await fetch("/api/send_email", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
